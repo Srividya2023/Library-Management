@@ -398,112 +398,126 @@ bookmarkFormEl.addEventListener("submit", function (event) {
   }
 })
 
-let searchResultsEl = document.getElementById("searchResults")
-let searchInputEl = document.getElementById("searchInput")
-let spinnerEl = document.getElementById("spinner")
+let searchResultsEl = document.getElementById("searchResults");
+let searchInputEl = document.getElementById("searchInput");
+let spinnerEl = document.getElementById("spinner");
 
 function createAndAppendSearchResult(result) {
-  let { author, imageLink, title } = result
+    let {
+        author,
+        imageLink,
+        title
+    } = result;
 
-  let resultItemEl = document.createElement("div")
-  resultItemEl.classList.add("w-100")
-  resultItemEl.classList.add("col-5", "m-auto")
 
-  //searchResultsEl.classList.add("d-flex", "flex-row", "justify-content-center");
 
-  let imageEl = document.createElement("img")
-  //imageEl.classList.add("col-11", "col-md-5", "mr-auto", "ml-auto");
+    let resultItemEl = document.createElement("div");
+    resultItemEl.classList.add("w-100");
+    resultItemEl.classList.add("col-5", "m-auto");
 
-  imageEl.src = imageLink
-  //imageEl.classList.add("col-6");
-  resultItemEl.appendChild(imageEl)
-  //searchResultsEl.appendChild(imageEl);
+    //searchResultsEl.classList.add("d-flex", "flex-row", "justify-content-center");
 
-  let paraEl = document.createElement("p")
-  paraEl.classList.add("author-dynamic", "mt-2")
 
-  paraEl.textContent = author
+    let imageEl = document.createElement("img");
+    //imageEl.classList.add("col-11", "col-md-5", "mr-auto", "ml-auto");
 
-  resultItemEl.appendChild(paraEl)
+    imageEl.src = imageLink;
+    //imageEl.classList.add("col-6");
+    resultItemEl.appendChild(imageEl);
+    //searchResultsEl.appendChild(imageEl);
 
-  searchResultsEl.appendChild(resultItemEl)
+
+    let paraEl = document.createElement("p");
+    paraEl.classList.add("author-dynamic", "mt-2");
+
+    paraEl.textContent = author;
+
+    resultItemEl.appendChild(paraEl);
+
+
+    searchResultsEl.appendChild(resultItemEl);
+
 }
 
 function displayResult(search_results) {
-  spinnerEl.classList.add("d-none")
+    spinnerEl.classList.add("d-none");
 
-  let headingEl = document.createElement("h1")
-  headingEl.textContent = "Popular Books"
-  //h.classList.add("style")
-  headingEl.classList.add("w-80")
-  headingEl.classList.add("col-12", "ml-3", "mt-2", "mb-2", "heading-dynamic")
+    let headingEl = document.createElement("h1");
+    headingEl.textContent = "Popular Books";
+    //h.classList.add("style")
+    headingEl.classList.add("w-80");
+    headingEl.classList.add("col-12", "ml-3", "mt-2", "mb-2", "heading-dynamic");
 
-  searchResultsEl.appendChild(headingEl)
+    searchResultsEl.appendChild(headingEl);
 
-  for (let result of search_results) {
-    createAndAppendSearchResult(result)
-  }
+    for (let result of search_results) {
+        createAndAppendSearchResult(result);
+    }
 }
 
 function resultsNotFound() {
-  spinnerEl.classList.add("d-none")
+    spinnerEl.classList.add("d-none");
 
-  let headingElNotFound = document.createElement("h1")
-  headingElNotFound.textContent = "No results found"
-  headingElNotFound.classList.add(
-    "heading-dynamic",
-    "col-12",
-    "w-80",
-    "ml-4",
-    "mt-3"
-  )
-  searchResultsEl.appendChild(headingElNotFound)
+    let headingElNotFound = document.createElement("h1");
+    headingElNotFound.textContent = "No results found";
+    headingElNotFound.classList.add("heading-dynamic", "col-12", "w-80", "ml-4", "mt-3");
+    searchResultsEl.appendChild(headingElNotFound);
+
 }
 
 function searchBooks(event) {
-  let searchInput = searchInputEl.value
+    let searchInput = searchInputEl.value;
+    spinnerEl.classList.remove("d-none");
 
-  if (event.key === "Enter" && searchInput !== "") {
-    spinnerEl.classList.remove("d-none")
-    searchResultsEl.textContent = ""
+    if (event.key === "Enter" && searchInput !== "") {
+        searchResultsEl.textContent = "";
 
-    let url = "https://apis.ccbp.in/book-store?title=" + searchInput
 
-    let options = {
-      method: "GET",
+
+
+
+        let url = "https://apis.ccbp.in/book-store?title=" + searchInput;
+
+        let options = {
+            method: "GET",
+        };
+
+        fetch(url, options)
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(jsonData) {
+                let {
+                    search_results
+                } = jsonData;
+                //console.log(jsonData.search_results);
+                // if(searchInput.includes)
+                let count = 0;
+                for (let book of jsonData.search_results) {
+                    //console.log(country)
+                    let bookName = book.title;
+
+                    if (bookName.includes(searchInput)) {
+                        count += 1;
+                        displayResult(search_results);
+                    }
+
+                }
+                if (count === 0) {
+                    resultsNotFound();
+                }
+            });
+
+    } else if (event.key === "Enter" && searchInput === "") {
+
+        //spinnerEl.classList.remove("d-none");
+        searchResultsEl.textContent = "";
+
+        resultsNotFound();
     }
-
-    fetch(url, options)
-      .then(function (response) {
-        return response.json()
-      })
-      .then(function (jsonData) {
-        let { search_results } = jsonData
-        //console.log(jsonData.search_results);
-        // if(searchInput.includes)
-        let count = 0
-        for (let book of jsonData.search_results) {
-          //console.log(country)
-          let bookName = book.title
-
-          if (bookName.includes(searchInput)) {
-            count += 1
-            displayResult(search_results)
-          }
-        }
-        if (count === 0) {
-          resultsNotFound()
-        }
-      })
-  } else if (event.key === "Enter" && searchInput === "") {
-    spinnerEl.classList.remove("d-none")
-    searchResultsEl.textContent = ""
-
-    resultsNotFound()
-  }
 }
 
-searchInputEl.addEventListener("keydown", searchBooks)
+searchInputEl.addEventListener("keydown", searchBooks);
 
 document
   .getElementById("signin-form")
